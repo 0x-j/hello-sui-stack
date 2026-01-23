@@ -25,6 +25,9 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+  optimizeDeps: {
+    exclude: ["@mysten/walrus-wasm"],
+  },
 })
 
 export default config

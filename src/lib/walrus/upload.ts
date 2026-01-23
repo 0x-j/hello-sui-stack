@@ -62,7 +62,10 @@ export async function uploadImageToWalrus(
     // Step 4: Encode the file
     await flow.encode();
 
-    // Step 5: Register blob on-chain
+    // Step 5: Register blob on-chain AND send tip to upload relay
+    // The register() method automatically handles BOTH:
+    // 1. Registering the blob with storage parameters
+    // 2. Sending tip to the upload relay (configured in client.ts with sendTip.max)
     const { digest: registerDigest } = await signAndExecuteTransaction({
       transaction: flow.register({
         epochs: 1, // Store for 1 epoch (about 1 day on testnet)
