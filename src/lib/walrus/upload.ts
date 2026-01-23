@@ -1,28 +1,8 @@
-/**
- * Walrus upload utilities using the publisher relay endpoint
- * Based on: https://github.com/MystenLabs/walrus-sdk-relay-example-app
- */
+import { WalrusFile } from '@mysten/walrus';
+import { walrusClient } from './client';
+import type { SignAndExecuteTransaction } from '@mysten/dapp-kit';
 
-const PUBLISHER_URL = import.meta.env.VITE_WALRUS_PUBLISHER_URL;
 const AGGREGATOR_URL = import.meta.env.VITE_WALRUS_AGGREGATOR_URL;
-
-export interface WalrusUploadResponse {
-  newlyCreated?: {
-    blobObject: {
-      id: string;
-      blobId: string;
-      storedEpoch: number;
-      size: number;
-    };
-    encodedSize: number;
-    cost: number;
-  };
-  alreadyCertified?: {
-    blobId: string;
-    endEpoch: number;
-    eventOrObject: string;
-  };
-}
 
 /**
  * Convert base64 data URL to Blob
@@ -44,73 +24,90 @@ export function base64ToBlob(base64: string): Blob {
 }
 
 /**
- * Upload a blob to Walrus using the publisher relay
+ * Upload image to Walrus using the official SDK with upload relay
+ * Following the pattern from: https://github.com/MystenLabs/walrus-sdk-relay-example-app
+ *
+ * @param base64Image - Base64 encoded image data URL
+ * @param signAndExecuteTransaction - Function to sign and execute transactions
+ * @param userAddress - User's Sui address
+ * @returns Walrus blob URL
  */
-export async function uploadToWalrus(blob: Blob): Promise<string> {
-  if (!PUBLISHER_URL) {
-    throw new Error('VITE_WALRUS_PUBLISHER_URL not configured');
+export async function uploadImageToWalrus(
+  base64Image: string,
+  signAndExecuteTransaction: SignAndExecuteTransaction,
+  userAddress: string
+): Promise<string> {
+  try {
+    // Step 1: Convert base64 to blob
+    const blob = base64ToBlob(base64Image);
+    const arrayBuffer = await blob.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    // Step 2: Create WalrusFile
+    const files = [
+      WalrusFile.from({
+        contents: uint8Array,
+        identifier: 'profile-nft.png',
+        tags: {
+          contentType: 'image/png',
+        },
+      }),
+    ];
+
+    // Step 3: Create WriteFilesFlow
+    const flow = walrusClient.writeFilesFlow({
+      files,
+    });
+
+    // Step 4: Encode the file
+    await flow.encode();
+
+    // Step 5: Register blob on-chain
+    const { digest: registerDigest } = await signAndExecuteTransaction({
+      transaction: flow.register({
+        epochs: 1, // Store for 1 epoch (about 1 day on testnet)
+        deletable: false,
+        owner: userAddress,
+      }),
+    });
+
+    // Step 6: Upload to storage nodes via relay
+    await flow.upload({
+      digest: registerDigest,
+    });
+
+    // Step 7: Certify blob on-chain
+    await signAndExecuteTransaction({
+      transaction: flow.certify(),
+    });
+
+    // Step 8: Get the blob IDs
+    const fileList = await flow.listFiles();
+
+    if (fileList.length === 0) {
+      throw new Error('No files were uploaded');
+    }
+
+    const blobId = fileList[0].blobId;
+
+    // Step 9: Construct Walrus URL
+    if (!AGGREGATOR_URL) {
+      throw new Error('VITE_WALRUS_AGGREGATOR_URL not configured');
+    }
+
+    return `${AGGREGATOR_URL}/v1/${blobId}`;
+
+  } catch (error) {
+    console.error('Walrus upload error:', error);
+    throw new Error(
+      `Failed to upload to Walrus: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
-
-  // Upload to Walrus publisher
-  const response = await fetch(`${PUBLISHER_URL}/v1/store`, {
-    method: 'PUT',
-    body: blob,
-    headers: {
-      'Content-Type': 'application/octet-stream',
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Walrus upload failed: ${response.status} ${errorText}`);
-  }
-
-  const result: WalrusUploadResponse = await response.json();
-
-  // Extract blob ID
-  let blobId: string;
-
-  if (result.newlyCreated) {
-    blobId = result.newlyCreated.blobObject.blobId;
-  } else if (result.alreadyCertified) {
-    blobId = result.alreadyCertified.blobId;
-  } else {
-    throw new Error('Invalid Walrus upload response');
-  }
-
-  return blobId;
-}
-
-/**
- * Convert blob ID to Walrus URL
- */
-export function getWalrusUrl(blobId: string): string {
-  if (!AGGREGATOR_URL) {
-    throw new Error('VITE_WALRUS_AGGREGATOR_URL not configured');
-  }
-
-  return `${AGGREGATOR_URL}/v1/${blobId}`;
-}
-
-/**
- * Upload image from base64 data URL and return Walrus URL
- */
-export async function uploadImageToWalrus(base64Image: string): Promise<string> {
-  // Convert base64 to blob
-  const blob = base64ToBlob(base64Image);
-
-  // Upload to Walrus
-  const blobId = await uploadToWalrus(blob);
-
-  // Get the URL
-  const url = getWalrusUrl(blobId);
-
-  return url;
 }
 
 /**
  * Check if Walrus is configured
  */
 export function isWalrusConfigured(): boolean {
-  return !!(PUBLISHER_URL && AGGREGATOR_URL);
+  return !!(import.meta.env.VITE_WALRUS_PUBLISHER_URL && AGGREGATOR_URL);
 }

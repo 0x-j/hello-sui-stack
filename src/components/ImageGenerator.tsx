@@ -8,7 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 export function ImageGenerator() {
   const account = useCurrentAccount();
   const queryClient = useQueryClient();
-  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const { mutate: signAndExecute, mutateAsync: signAndExecuteAsync } = useSignAndExecuteTransaction();
 
   const [prompt, setPrompt] = useState('');
   const [status, setStatus] = useState<'idle' | 'paying' | 'generating' | 'uploading' | 'minting' | 'success' | 'error'>('idle');
@@ -83,8 +83,12 @@ export function ImageGenerator() {
     setError(null);
 
     try {
-      // Step 1: Upload to Walrus
-      const walrusUrl = await uploadImageToWalrus(generatedImage);
+      // Step 1: Upload to Walrus (requires 2 on-chain transactions: register + certify)
+      const walrusUrl = await uploadImageToWalrus(
+        generatedImage,
+        signAndExecuteAsync,
+        account.address
+      );
       console.log('Uploaded to Walrus:', walrusUrl);
 
       // Step 2: Mint NFT
