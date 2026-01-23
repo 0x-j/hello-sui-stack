@@ -48,7 +48,8 @@ export function ImageGenerator() {
               });
 
               if (response.success && response.image) {
-                setGeneratedImage(`data:image/png;base64,${response.image}`);
+                // Server already returns full data URL, use it directly
+                setGeneratedImage(response.image);
                 setNftName(`Profile: ${prompt.slice(0, 30)}${prompt.length > 30 ? '...' : ''}`);
                 setNftDescription(`AI-generated profile picture based on: "${prompt}"`);
                 setStatus('success');
