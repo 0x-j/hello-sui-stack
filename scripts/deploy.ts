@@ -115,11 +115,14 @@ async function deploy() {
     console.log('   Package ID:', packageId);
 
     // Extract PaymentConfig object ID
-    const paymentConfigId = result.objectChanges?.find(
+    const paymentConfig = result.objectChanges?.find(
       (change) =>
         change.type === 'created' &&
         change.objectType?.includes('PaymentConfig')
-    )?.objectId;
+    );
+
+    // @ts-ignore
+    let paymentConfigId = paymentConfig?.objectId;
 
     if (!paymentConfigId) {
       throw new Error('PaymentConfig object ID not found');
