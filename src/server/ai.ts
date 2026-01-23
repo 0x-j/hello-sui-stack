@@ -1,5 +1,5 @@
-import { createServerFn } from '@tanstack/react-start/server';
-import { generateImage } from 'ai';
+import { createServerFn } from '@tanstack/react-start';
+import { generateText } from 'ai';
 import { SuiClient } from '@mysten/sui/client';
 
 const API_KEY = process.env.AI_GATEWAY_API_KEY;
@@ -73,21 +73,42 @@ export const generateProfileImage = createServerFn({ method: 'POST' })
     try {
       // Using nano banana model via Vercel AI SDK
       // Reference: https://vercel.com/docs/ai-gateway/image-generation/ai-sdk#nano-banana-google/gemini-2.5-flash-image
-      const { image } = await generateImage({
-        model: 'nano-banana/google/gemini-2.5-flash-image',
+      const result = await generateText({
+        model: 'google/gemini-2.5-flash-image',
         prompt: `Create a unique profile picture: ${prompt}. Style: vibrant, artistic, suitable for a social media avatar.`,
-        apiKey: API_KEY,
-        size: '1024x1024',
       });
 
-      console.log('✅ Image generated successfully');
+      console.log(`Generated ${result.files?.length || 0} file(s)`);
+      console.log('Usage:', JSON.stringify(result.usage, null, 2));
+
+      // Filter for image files from result.files
+      const imageFiles = result.files?.filter((f) =>
+        f.mediaType?.startsWith('image/'),
+      ) || [];
+
+      console.log(`Found ${imageFiles.length} image file(s)`);
+
+      if (imageFiles.length === 0) {
+        console.error('No image files generated');
+        throw new Error('No image was generated. The model may not support image generation.');
+      }
+
+      // Get the first image
+      const imageFile = imageFiles[0];
+      console.log('Image media type:', imageFile.mediaType);
+      console.log('Image size:', imageFile.uint8Array.byteLength, 'bytes');
+
+      // Convert uint8Array to base64 using Node.js Buffer
+      const base64Image = Buffer.from(imageFile.uint8Array).toString('base64');
+      const imageUrl = `data:${imageFile.mediaType};base64,${base64Image}`;
+
+      console.log('Image converted to base64 data URL successfully');
 
       // Return base64 image
       return {
         success: true,
-        image: image.base64,
+        image: imageUrl,
       };
-
     } catch (error: any) {
       console.error('❌ Image generation failed:', error);
       throw new Error(`Failed to generate image: ${error.message}`);
