@@ -46,7 +46,20 @@ async function deploy() {
     return;
   }
 
-  // 4. Build the Move package
+  // 4. Run unit tests
+  console.log('🧪 Running unit tests...');
+  try {
+    execSync('sui move test', {
+      cwd: join(__dirname, '../move'),
+      stdio: 'inherit'
+    });
+    console.log('✅ All tests passed\n');
+  } catch (error) {
+    console.error('❌ Tests failed');
+    throw error;
+  }
+
+  // 5. Build the Move package
   console.log('🔨 Building Move package...');
   try {
     execSync('sui move build', {
@@ -59,7 +72,7 @@ async function deploy() {
     throw error;
   }
 
-  // 5. Publish the package
+  // 6. Publish the package
   console.log('📦 Publishing package...');
   try {
     const { modules, dependencies } = JSON.parse(
@@ -115,7 +128,7 @@ async function deploy() {
     console.log('   PaymentConfig ID:', paymentConfigId);
     console.log();
 
-    // 6. Update .env.local file
+    // 7. Update .env.local file
     console.log('📝 Updating .env.local...');
     const envPath = join(__dirname, '../.env.local');
     let envContent = readFileSync(envPath, 'utf-8');
@@ -135,7 +148,7 @@ async function deploy() {
     writeFileSync(envPath, envContent);
     console.log('✅ Environment variables updated\n');
 
-    // 7. Summary
+    // 8. Summary
     console.log('=====================================');
     console.log('🎉 Deployment complete!');
     console.log('=====================================');
