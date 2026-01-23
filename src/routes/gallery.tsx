@@ -11,13 +11,13 @@ function Gallery() {
 
   if (!account) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50">
         <section className="py-20 px-6">
           <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
+            <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
               NFT Gallery
             </h1>
-            <p className="text-gray-400">
+            <p className="text-gray-700 text-lg">
               Please connect your Sui wallet to view your NFTs
             </p>
           </div>
@@ -27,14 +27,14 @@ function Gallery() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <section className="py-12 px-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50">
+      <section className="py-12 px-6 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-2">
+            <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
               Your NFT Gallery
             </h1>
-            <p className="text-gray-400">
+            <p className="text-gray-700 text-lg">
               View all your minted profile NFTs
             </p>
           </div>
@@ -44,13 +44,13 @@ function Gallery() {
               {[...Array(4)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden animate-pulse"
+                  className="bg-white border border-gray-200 rounded-2xl overflow-hidden animate-pulse shadow-sm"
                 >
-                  <div className="aspect-square bg-slate-700"></div>
+                  <div className="aspect-square bg-gray-200"></div>
                   <div className="p-4 space-y-3">
-                    <div className="h-6 bg-slate-700 rounded"></div>
-                    <div className="h-4 bg-slate-700 rounded w-3/4"></div>
-                    <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+                    <div className="h-6 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                   </div>
                 </div>
               ))}
@@ -58,8 +58,8 @@ function Gallery() {
           )}
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-              <p className="text-red-400 text-sm">
+            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+              <p className="text-red-700 font-medium">
                 Error loading NFTs: {error.message}
               </p>
             </div>
@@ -67,9 +67,9 @@ function Gallery() {
 
           {!isLoading && !error && nfts && nfts.length === 0 && (
             <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800 mb-4">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 mb-6 shadow-inner">
                 <svg
-                  className="w-10 h-10 text-gray-500"
+                  className="w-12 h-12 text-blue-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -82,17 +82,17 @@ function Gallery() {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-semibold text-white mb-2">
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">
                 No NFTs Yet
               </h2>
-              <p className="text-gray-400 mb-6">
+              <p className="text-gray-600 text-lg mb-8">
                 Generate and mint your first profile NFT to see it here
               </p>
               <a
                 href="/"
-                className="inline-block px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors"
+                className="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200"
               >
-                Create Your First NFT
+                ✨ Create Your First NFT
               </a>
             </div>
           )}

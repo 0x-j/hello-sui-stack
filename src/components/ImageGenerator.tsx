@@ -128,7 +128,7 @@ export function ImageGenerator() {
   if (!account) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">
+        <p className="text-gray-600 text-lg">
           Please connect your Sui wallet to generate profile images
         </p>
       </div>
@@ -136,10 +136,10 @@ export function ImageGenerator() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Prompt Input */}
       <div className="space-y-2">
-        <label htmlFor="prompt" className="text-sm font-medium">
+        <label htmlFor="prompt" className="text-sm font-semibold text-gray-700 block">
           Describe your profile image
         </label>
         <textarea
@@ -147,11 +147,11 @@ export function ImageGenerator() {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="e.g., A futuristic astronaut with neon colors"
-          className="w-full min-h-24 p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full min-h-28 p-4 border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
           disabled={status !== 'idle' && status !== 'success' && status !== 'error'}
         />
-        <p className="text-xs text-muted-foreground">
-          Cost: {getPaymentAmountInSui()} SUI per generation
+        <p className="text-xs text-gray-600 font-medium">
+          💰 Cost: {getPaymentAmountInSui()} SUI per generation
         </p>
       </div>
 
@@ -160,25 +160,25 @@ export function ImageGenerator() {
         <button
           onClick={handleGenerate}
           disabled={!prompt.trim() || (status !== 'idle' && status !== 'error')}
-          className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-200"
         >
-          {status === 'paying' && 'Processing Payment...'}
-          {status === 'generating' && 'Generating Image...'}
-          {(status === 'idle' || status === 'error') && 'Generate Image'}
+          {status === 'paying' && '⏳ Processing Payment...'}
+          {status === 'generating' && '🎨 Generating Image...'}
+          {(status === 'idle' || status === 'error') && '✨ Generate Image'}
         </button>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-destructive/10 border border-destructive rounded-lg">
-          <p className="text-sm text-destructive">{error}</p>
+        <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+          <p className="text-sm text-red-700 font-medium">❌ {error}</p>
         </div>
       )}
 
       {/* Generated Image */}
       {generatedImage && (
-        <div className="space-y-4">
-          <div className="border rounded-lg overflow-hidden">
+        <div className="space-y-5">
+          <div className="border-4 border-blue-100 rounded-2xl overflow-hidden shadow-xl">
             <img
               src={generatedImage}
               alt="Generated profile"
@@ -187,9 +187,9 @@ export function ImageGenerator() {
           </div>
 
           {/* NFT Metadata Inputs */}
-          <div className="space-y-3">
+          <div className="space-y-4 bg-gray-50 p-5 rounded-xl border border-gray-200">
             <div>
-              <label htmlFor="nft-name" className="text-sm font-medium">
+              <label htmlFor="nft-name" className="text-sm font-semibold text-gray-700 block mb-2">
                 NFT Name
               </label>
               <input
@@ -197,21 +197,21 @@ export function ImageGenerator() {
                 type="text"
                 value={nftName}
                 onChange={(e) => setNftName(e.target.value)}
-                className="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
                 disabled={status === 'uploading' || status === 'minting'}
               />
             </div>
 
             <div>
-              <label htmlFor="nft-description" className="text-sm font-medium">
+              <label htmlFor="nft-description" className="text-sm font-semibold text-gray-700 block mb-2">
                 NFT Description
               </label>
               <textarea
                 id="nft-description"
                 value={nftDescription}
                 onChange={(e) => setNftDescription(e.target.value)}
-                className="w-full mt-1 p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
-                rows={2}
+                className="w-full p-3 border-2 border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                rows={3}
                 disabled={status === 'uploading' || status === 'minting'}
               />
             </div>
@@ -222,11 +222,11 @@ export function ImageGenerator() {
             <button
               onClick={handleMint}
               disabled={!nftName.trim() || status === 'uploading' || status === 'minting'}
-              className="flex-1 py-3 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-200"
             >
-              {status === 'uploading' && 'Uploading to Walrus...'}
-              {status === 'minting' && 'Minting NFT...'}
-              {status !== 'uploading' && status !== 'minting' && 'Upload & Mint NFT'}
+              {status === 'uploading' && '📤 Uploading to Walrus...'}
+              {status === 'minting' && '⚡ Minting NFT...'}
+              {status !== 'uploading' && status !== 'minting' && '🚀 Upload & Mint NFT'}
             </button>
 
             <button
@@ -236,7 +236,7 @@ export function ImageGenerator() {
                 setError(null);
               }}
               disabled={status === 'uploading' || status === 'minting'}
-              className="px-4 py-3 border rounded-lg font-medium hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-4 border-2 border-gray-300 bg-white text-gray-700 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               Cancel
             </button>

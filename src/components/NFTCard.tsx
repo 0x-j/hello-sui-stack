@@ -12,17 +12,20 @@ export function NFTCard({ nft }: NFTCardProps) {
   const createdDate = new Date(Number(nft.created_at)).toLocaleDateString();
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-card hover:shadow-lg transition-shadow">
+    <div className="border-2 border-gray-200 rounded-2xl overflow-hidden bg-white hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-300 transition-all duration-200">
       {/* Image */}
-      <div className="aspect-square bg-muted relative">
+      <div className="aspect-square bg-gray-100 relative">
         {!imageLoaded && !imageError && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-blue-600"></div>
           </div>
         )}
         {imageError ? (
-          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-            Failed to load image
+          <div className="absolute inset-0 flex items-center justify-center text-gray-500 flex-col gap-2">
+            <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="text-sm">Failed to load image</span>
           </div>
         ) : (
           <img
@@ -37,13 +40,13 @@ export function NFTCard({ nft }: NFTCardProps) {
 
       {/* Metadata */}
       <div className="p-4 space-y-2">
-        <h3 className="font-semibold text-lg truncate">{nft.name}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2">
+        <h3 className="font-bold text-lg text-gray-900 truncate">{nft.name}</h3>
+        <p className="text-sm text-gray-600 line-clamp-2">
           {nft.description}
         </p>
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-          <span>Created {createdDate}</span>
-          <span className="font-mono">
+        <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-200">
+          <span className="font-medium">Created {createdDate}</span>
+          <span className="font-mono bg-gray-100 px-2 py-1 rounded">
             {nft.objectId.slice(0, 6)}...{nft.objectId.slice(-4)}
           </span>
         </div>
