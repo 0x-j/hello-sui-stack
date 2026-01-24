@@ -8,9 +8,7 @@ import { useWalrusUpload } from '@/hooks/useWalrusUpload';
 import { formatCostDisplay, formatTotalCost } from '@/lib/walrus/costFormatting';
 import { base64ToBlob } from '@/lib/walrus/upload';
 import { useNavigate } from '@tanstack/react-router';
-
-// Tip amount configured in client.ts (max: 1000 MIST = 0.000001 SUI)
-const TIP_AMOUNT_SUI = 0.000001;
+import { UPLOAD_TIP_SUI } from '@/lib/walrus/client';
 
 // Helper function to get button class based on state
 function getStepButtonClass(isReady: boolean, isLoading: boolean, isCompleted: boolean): string {
@@ -339,7 +337,7 @@ export function ImageGenerator() {
             <div className="flex justify-between items-center text-gray-300">
               <span>Tip Amount:</span>
               <span className="font-mono text-white">
-                {imageSize > 0 ? formatCostDisplay(TIP_AMOUNT_SUI.toString(), 'SUI') : '---'}
+                {imageSize > 0 ? formatCostDisplay(UPLOAD_TIP_SUI.toString(), 'SUI') : '---'}
               </span>
             </div>
 
@@ -347,7 +345,7 @@ export function ImageGenerator() {
               <div className="flex justify-between items-center text-gray-300">
                 <span className="font-bold text-white">Total Cost:</span>
                 <span className="font-mono text-white font-bold">
-                  {formatTotalCost(storageCost.totalCost, TIP_AMOUNT_SUI)}
+                  {formatTotalCost(storageCost.totalCost, UPLOAD_TIP_SUI)}
                 </span>
               </div>
             </div>
