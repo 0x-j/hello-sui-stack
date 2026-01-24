@@ -3,6 +3,7 @@ import { WalrusFile } from '@mysten/walrus';
 import { walrusClient } from '@/lib/walrus/client';
 import { base64ToBlob } from '@/lib/walrus/upload';
 import { buildWalrusUrl } from '@/lib/walrus/url';
+import { Transaction } from '@mysten/sui/transactions';
 
 type UploadState =
   | 'idle'
@@ -14,14 +15,16 @@ type UploadState =
   | 'can-certify'
   | 'certifying';
 
+type SignAndExecuteFunction = (args: { transaction: Transaction }) => Promise<{ digest: string }>;
+
 interface UseWalrusUploadResult {
   state: UploadState;
   error: string | null;
   blobUrl: string | null;
   encodeFile: (base64Image: string) => Promise<void>;
-  registerBlob: (signAndExecute: any, userAddress: string, epochs: number) => Promise<void>;
+  registerBlob: (signAndExecute: SignAndExecuteFunction, userAddress: string, epochs: number) => Promise<void>;
   writeToUploadRelay: (registerDigest: string) => Promise<void>;
-  certifyBlob: (signAndExecute: any) => Promise<string>;
+  certifyBlob: (signAndExecute: SignAndExecuteFunction) => Promise<string>;
   reset: () => void;
   isEncoding: boolean;
   canRegister: boolean;
@@ -76,15 +79,15 @@ export function useWalrusUpload(): UseWalrusUploadResult {
 
       setFlow(writeFlow);
       setState('can-register');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Encoding error:', err);
-      setError(err.message || 'Failed to encode file');
+      setError(err instanceof Error ? err.message : 'Failed to encode file');
       setState('idle');
     }
   }, []);
 
   const registerBlob = useCallback(async (
-    signAndExecute: any,
+    signAndExecute: SignAndExecuteFunction,
     userAddress: string,
     epochs: number = 1
   ) => {
@@ -106,9 +109,9 @@ export function useWalrusUpload(): UseWalrusUploadResult {
 
       setRegisterDigest(digest);
       setState('can-relay');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Registration error:', err);
-      setError(err.message || 'Failed to register blob');
+      setError(err instanceof Error ? err.message : 'Failed to register blob');
       setState('can-register');
       throw err;
     }
@@ -131,15 +134,15 @@ export function useWalrusUpload(): UseWalrusUploadResult {
       await flow.upload({ digest: uploadDigest });
 
       setState('can-certify');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Upload error:', err);
-      setError(err.message || 'Failed to upload to network');
+      setError(err instanceof Error ? err.message : 'Failed to upload to network');
       setState('can-relay');
       throw err;
     }
   }, [flow, state, registerDigest]);
 
-  const certifyBlob = useCallback(async (signAndExecute: any): Promise<string> => {
+  const certifyBlob = useCallback(async (signAndExecute: SignAndExecuteFunction): Promise<string> => {
     if (!flow || state !== 'can-certify') {
       throw new Error('Cannot certify: flow not ready');
     }
@@ -168,9 +171,9 @@ export function useWalrusUpload(): UseWalrusUploadResult {
       setState('idle');
 
       return url;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Certification error:', err);
-      setError(err.message || 'Failed to certify blob');
+      setError(err instanceof Error ? err.message : 'Failed to certify blob');
       setState('can-certify');
       throw err;
     }

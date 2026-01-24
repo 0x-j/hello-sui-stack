@@ -26,9 +26,9 @@ export interface PaymentConfig {
 }
 
 // Type guard for ProfileNFT
-export function isProfileNFT(obj: any): obj is ProfileNFT {
+export function isProfileNFT(obj: unknown): obj is ProfileNFT {
   return (
-    obj &&
+    obj !== null &&
     typeof obj === 'object' &&
     'name' in obj &&
     'description' in obj &&

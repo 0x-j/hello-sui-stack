@@ -108,8 +108,8 @@ export const generateProfileImage = createServerFn({ method: 'POST' })
         success: true,
         image: imageUrl,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Image generation failed:', error);
-      throw new Error(`Failed to generate image: ${error.message}`);
+      throw new Error(`Failed to generate image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   });
