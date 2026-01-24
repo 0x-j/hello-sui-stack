@@ -3,6 +3,13 @@ import { WalletConnect } from './WalletConnect';
 import { useState } from 'react';
 import { Home, ImageIcon, Menu, X } from 'lucide-react';
 
+// Navigation link styles
+const NAV_LINK_BASE = 'px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition-colors';
+const NAV_LINK_ACTIVE = 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium shadow-sm transition-colors';
+
+const MOBILE_LINK_BASE = 'flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors mb-2';
+const MOBILE_LINK_ACTIVE = 'flex items-center gap-3 p-3 rounded-lg bg-blue-600 text-white transition-colors mb-2';
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -27,18 +34,18 @@ export default function Header() {
           <nav className="hidden lg:flex items-center gap-2 ml-8">
             <Link
               to="/"
-              className="px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition-colors"
+              className={NAV_LINK_BASE}
               activeProps={{
-                className: 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium shadow-sm transition-colors',
+                className: NAV_LINK_ACTIVE,
               }}
             >
               Home
             </Link>
             <Link
               to="/gallery"
-              className="px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition-colors"
+              className={NAV_LINK_BASE}
               activeProps={{
-                className: 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium shadow-sm transition-colors',
+                className: NAV_LINK_ACTIVE,
               }}
             >
               Gallery
@@ -70,10 +77,9 @@ export default function Header() {
           <Link
             to="/"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors mb-2"
+            className={MOBILE_LINK_BASE}
             activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-blue-600 text-white transition-colors mb-2',
+              className: MOBILE_LINK_ACTIVE,
             }}
           >
             <Home size={20} />
@@ -83,10 +89,9 @@ export default function Header() {
           <Link
             to="/gallery"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors mb-2"
+            className={MOBILE_LINK_BASE}
             activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-blue-600 text-white transition-colors mb-2',
+              className: MOBILE_LINK_ACTIVE,
             }}
           >
             <ImageIcon size={20} />
