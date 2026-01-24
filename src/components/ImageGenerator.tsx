@@ -78,8 +78,6 @@ export function ImageGenerator() {
         },
         {
           onSuccess: async (result) => {
-            console.log('Payment successful:', result.digest);
-
             // Step 2: Generate image via server function
             setStatus('generating');
 
@@ -160,7 +158,6 @@ export function ImageGenerator() {
     try {
       // Certify the blob
       const url = await walrusUpload.certifyBlob(signAndExecuteAsync);
-      console.log('Uploaded to Walrus:', url);
       setWalrusUrl(url);
     } catch (err: any) {
       console.error('Certify error:', err);
@@ -187,7 +184,6 @@ export function ImageGenerator() {
         },
         {
           onSuccess: (result) => {
-            console.log('NFT minted:', result.digest);
             setStatus('success');
             setGeneratedImage(null);
             setPrompt('');
