@@ -40,17 +40,18 @@ function Gallery() {
           </div>
 
           {isLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
+            <div className="flex flex-col gap-6">
+              {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-white border border-gray-200 rounded-2xl overflow-hidden animate-pulse shadow-sm"
+                  className="w-full max-w-[480px] bg-white border-2 border-gray-200 rounded-2xl animate-pulse flex flex-col sm:flex-row gap-4 p-4"
                 >
-                  <div className="aspect-square bg-gray-200"></div>
-                  <div className="p-4 space-y-3">
-                    <div className="h-6 bg-gray-200 rounded"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="w-full sm:w-[142px] h-[142px] bg-gray-200 rounded-lg flex-shrink-0"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-8 bg-gray-200 rounded"></div>
+                    <div className="h-8 bg-gray-200 rounded"></div>
+                    <div className="h-8 bg-gray-200 rounded"></div>
+                    <div className="h-8 bg-gray-200 rounded"></div>
                   </div>
                 </div>
               ))}
@@ -98,7 +99,7 @@ function Gallery() {
           )}
 
           {!isLoading && !error && nfts && nfts.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="flex flex-col gap-6">
               {nfts.map((nft) => (
                 <NFTCard key={nft.objectId} nft={nft} />
               ))}
