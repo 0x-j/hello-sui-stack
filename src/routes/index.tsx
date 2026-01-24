@@ -27,7 +27,7 @@ function App() {
 
         <div className="relative max-w-[1400px] mx-auto">
           {/* Main heading with staggered animation */}
-          <div className="mb-8 opacity-0 animate-fade-in-up">
+          <div className="mb-8 animate-fade-in-up">
             <div className="inline-block mb-4">
               <span className="badge-brutal border-cyber text-cyber">
                 AI-POWERED • WEB3
@@ -44,7 +44,7 @@ function App() {
           </div>
 
           {/* Tech stack badges */}
-          <div className="flex flex-wrap gap-3 opacity-0 animate-fade-in-up delay-100">
+          <div className="flex flex-wrap gap-3 animate-fade-in-up delay-100">
             <div className="badge-brutal border-cyber text-cyber">
               NANO BANANA AI
             </div>
@@ -60,7 +60,7 @@ function App() {
 
       {/* Contract warning */}
       {!isConfigured && (
-        <div className="max-w-[1400px] mx-auto px-6 py-6 opacity-0 animate-fade-in-up delay-200">
+        <div className="max-w-[1400px] mx-auto px-6 py-6 animate-fade-in-up delay-200">
           <div className="border-[3px] border-blood bg-slate p-6">
             <div className="flex items-start gap-4">
               <AlertTriangle className="text-blood flex-shrink-0" size={24} />
@@ -81,7 +81,7 @@ function App() {
       <section className="py-12 px-6 max-w-[1800px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Main Generator - 8 columns */}
-          <div className="lg:col-span-8 opacity-0 animate-fade-in-up delay-300">
+          <div className="lg:col-span-8 animate-fade-in-up delay-300">
             <div className="relative bg-slate border-[3px] border-cyber p-8 md:p-12">
               {/* Top accent line */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyber to-magenta"></div>
@@ -103,7 +103,7 @@ function App() {
           <div className="lg:col-span-4 space-y-8">
             {/* Latest NFT Preview */}
             {latestNFT && (
-              <div className="card-brutal p-6 opacity-0 animate-fade-in-up delay-400">
+              <div className="card-brutal p-6 animate-fade-in-up delay-400">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-cyber mb-4 flex items-center gap-2">
                   <Sparkles size={18} />
                   Latest Mint
@@ -130,7 +130,7 @@ function App() {
             )}
 
             {/* How it Works */}
-            <div className="card-brutal p-6 opacity-0 animate-fade-in-up delay-500">
+            <div className="card-brutal p-6 animate-fade-in-up delay-500">
               <h3 className="text-lg font-bold uppercase tracking-wider text-magenta mb-6">
                 Process_
               </h3>

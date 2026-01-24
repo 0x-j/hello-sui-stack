@@ -34,7 +34,7 @@ function Gallery() {
       {/* Header Section */}
       <section className="px-6 pt-16 pb-12 border-b-[3px] border-cyber">
         <div className="max-w-[1600px] mx-auto">
-          <div className="mb-8 opacity-0 animate-fade-in-up">
+          <div className="mb-8 animate-fade-in-up">
             <div className="inline-block mb-4">
               <span className="badge-brutal border-magenta text-magenta">
                 YOUR COLLECTION
@@ -60,7 +60,7 @@ function Gallery() {
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="border-[3px] border-smoke/30 bg-slate p-6 opacity-0 animate-fade-in-up"
+                  className="border-[3px] border-smoke/30 bg-slate p-6 animate-fade-in-up"
                   style={{ animationDelay: `${i * 0.1}s` }}
                 >
                   <div className="flex gap-6">
@@ -78,7 +78,7 @@ function Gallery() {
 
           {/* Error State */}
           {error && (
-            <div className="border-[3px] border-blood bg-slate p-8 opacity-0 animate-fade-in-up">
+            <div className="border-[3px] border-blood bg-slate p-8 animate-fade-in-up">
               <div className="flex items-start gap-4">
                 <AlertCircle className="text-blood flex-shrink-0" size={32} />
                 <div>
@@ -93,7 +93,7 @@ function Gallery() {
 
           {/* Empty State */}
           {!isLoading && !error && nfts && nfts.length === 0 && (
-            <div className="text-center py-20 opacity-0 animate-fade-in-up">
+            <div className="text-center py-20 animate-fade-in-up">
               <div className="max-w-2xl mx-auto border-[3px] border-cyber bg-slate p-12">
                 <div className="relative inline-block mb-8">
                   <div className="absolute inset-0 bg-cyber blur-xl opacity-50"></div>
@@ -120,7 +120,7 @@ function Gallery() {
           {!isLoading && !error && nfts && nfts.length > 0 && (
             <>
               {/* Stats Header */}
-              <div className="mb-8 flex items-center gap-4 opacity-0 animate-fade-in-up">
+              <div className="mb-8 flex items-center gap-4 animate-fade-in-up">
                 <Sparkles className="text-cyan" size={24} />
                 <span className="text-smoke font-mono text-lg">
                   <span className="text-cyber font-bold">{nfts.length}</span> NFT{nfts.length !== 1 ? 's' : ''} in collection
@@ -132,7 +132,7 @@ function Gallery() {
                 {nfts.map((nft, index) => (
                   <div
                     key={nft.objectId}
-                    className="opacity-0 animate-fade-in-up"
+                    className="animate-fade-in-up"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <NFTCard nft={nft} />
