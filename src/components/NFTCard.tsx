@@ -2,6 +2,7 @@ import { ProfileNFTWithId } from '@/types/sui';
 import { useState } from 'react';
 import { useSuiClient } from '@mysten/dapp-kit';
 import { useQuery } from '@tanstack/react-query';
+import { walrusClient } from '@/lib/walrus/client';
 
 interface NFTCardProps {
   nft: ProfileNFTWithId;
@@ -13,26 +14,42 @@ export function NFTCard({ nft }: NFTCardProps) {
   const [downloading, setDownloading] = useState(false);
   const client = useSuiClient();
 
-  // Extract patch ID from image URL (format: ${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId})
+  // Extract patch ID and blob ID from image URL
+  // Format: ${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId}?blobId=${blobId}
   const urlParts = nft.image_url.split('/by-quilt-patch-id/');
-  const patchId = urlParts.length > 1 ? urlParts[1] : '';
+  const pathAndQuery = urlParts.length > 1 ? urlParts[1] : '';
+  const [patchId, queryString] = pathAndQuery.split('?');
+  const blobId = queryString ? new URLSearchParams(queryString).get('blobId') || '' : '';
 
-  // Use patchId for display in Walruscan and download links
-  const displayId = patchId;
+  // Use blobId for display in Walruscan links
+  const displayId = blobId || patchId;
 
-  // Fetch object details to get storage info
-  const { data: objectData } = useQuery({
-    queryKey: ['nft-object', nft.objectId],
+  // Fetch blob metadata using Walrus SDK
+  const { data: blobMetadata } = useQuery({
+    queryKey: ['walrus-blob-metadata', blobId],
     queryFn: async () => {
-      const obj = await client.getObject({
-        id: nft.objectId,
-        options: {
-          showStorageRebate: true,
-        },
-      });
-      return obj.data;
+      if (!blobId) return null;
+
+      try {
+        // Get blob using Walrus SDK - this queries the blockchain
+        const blob = await walrusClient.getBlob({ blobId });
+
+        // Get the blob's Sui object to access storage information
+        const blobData = (blob as any)._blob || blob;
+
+        if (blobData?.blobObject?.storage?.end_epoch) {
+          return {
+            endEpoch: blobData.blobObject.storage.end_epoch,
+          };
+        }
+
+        return null;
+      } catch (error) {
+        console.error('Failed to fetch blob metadata:', error);
+        return null;
+      }
     },
-    enabled: !!nft.objectId,
+    enabled: !!blobId,
   });
 
   // Handle download by fetching blob and creating download link
@@ -89,7 +106,7 @@ export function NFTCard({ nft }: NFTCardProps) {
         <div className="bg-blue-50 rounded-t-md px-3 py-2 flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">End Epoch</span>
           <span className="text-sm font-medium text-blue-600">
-            {objectData?.storageRebate ? 'N/A' : 'Permanent'}
+            {blobMetadata?.endEpoch || 'N/A'}
           </span>
         </div>
         <div className="bg-gray-50 px-3 py-2 flex items-center justify-between">

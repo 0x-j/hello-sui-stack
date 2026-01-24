@@ -83,22 +83,26 @@ export async function uploadImageToWalrus(
       transaction: flow.certify(),
     });
 
-    // Step 8: Get the blob IDs
+    // Step 8: Get the blob information
     const fileList = await flow.listFiles();
 
     if (fileList.length === 0) {
       throw new Error('No files were uploaded');
     }
 
-    // Use the patch ID (quilt-patch-id) for retrieving the blob
-    const patchId = fileList[0].id;
+    const fileInfo = fileList[0];
 
-    // Step 9: Construct Walrus URL using the correct aggregator endpoint
+    // Get both patch ID (for URL) and blob ID (for metadata queries)
+    const patchId = fileInfo.id;
+    const blobId = fileInfo.blobId;
+
+    // Step 9: Construct Walrus URL with blob ID as query parameter
+    // This allows us to extract it later for metadata queries
     if (!AGGREGATOR_URL) {
       throw new Error('VITE_WALRUS_AGGREGATOR_URL not configured');
     }
 
-    return `${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId}`;
+    return `${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId}?blobId=${blobId}`;
 
   } catch (error) {
     console.error('Walrus upload error:', error);
