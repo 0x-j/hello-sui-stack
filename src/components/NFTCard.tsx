@@ -19,18 +19,30 @@ export function NFTCard({ nft }: NFTCardProps) {
   const urlParts = nft.image_url.split('/by-quilt-patch-id/');
   const pathAndQuery = urlParts.length > 1 ? urlParts[1] : '';
   const [patchId, queryString] = pathAndQuery.split('?');
-  const blobId = queryString ? new URLSearchParams(queryString).get('blobId') || '' : '';
-
-  // Use blobId for display in Walruscan links
-  const displayId = blobId || patchId;
+  const blobIdFromUrl = queryString ? new URLSearchParams(queryString).get('blobId') || '' : '';
 
   // Fetch blob metadata using Walrus SDK
   const { data: blobMetadata } = useQuery({
-    queryKey: ['walrus-blob-metadata', blobId],
+    queryKey: ['walrus-blob-metadata', patchId, blobIdFromUrl],
     queryFn: async () => {
-      if (!blobId) return null;
+      if (!patchId) return null;
 
       try {
+        let blobId = blobIdFromUrl;
+
+        // If blobId not in URL (old NFTs), get it from the quilt/patch using Walrus SDK
+        if (!blobId) {
+          const files = await walrusClient.getFiles({ ids: [patchId] });
+          if (files.length > 0) {
+            const file = files[0];
+            // Access the blob to get blobId
+            const blob = await file.blob();
+            blobId = (blob as any).blobId || (blob as any)._blobId;
+          }
+        }
+
+        if (!blobId) return null;
+
         // Get blob using Walrus SDK - this queries the blockchain
         const blob = await walrusClient.getBlob({ blobId });
 
@@ -40,6 +52,7 @@ export function NFTCard({ nft }: NFTCardProps) {
         if (blobData?.blobObject?.storage?.end_epoch) {
           return {
             endEpoch: blobData.blobObject.storage.end_epoch,
+            blobId,
           };
         }
 
@@ -49,8 +62,11 @@ export function NFTCard({ nft }: NFTCardProps) {
         return null;
       }
     },
-    enabled: !!blobId,
+    enabled: !!patchId,
   });
+
+  // Use blobId from metadata or URL for display
+  const displayId = blobMetadata?.blobId || blobIdFromUrl || patchId;
 
   // Handle download by fetching blob and creating download link
   const handleDownload = async (e: React.MouseEvent) => {
