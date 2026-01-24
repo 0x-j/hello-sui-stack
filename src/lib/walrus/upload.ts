@@ -1,9 +1,9 @@
 const AGGREGATOR_URL = import.meta.env.VITE_WALRUS_AGGREGATOR_URL;
 
 /**
- * Convert base64 data URL to Blob
+ * Convert base64 string to Uint8Array
  */
-export function base64ToBlob(base64: string): Blob {
+export function base64ToUint8Array(base64: string): Uint8Array {
   // Remove data URL prefix if present
   const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
 
@@ -15,7 +15,14 @@ export function base64ToBlob(base64: string): Blob {
     bytes[i] = binaryString.charCodeAt(i);
   }
 
-  // Create blob
+  return bytes;
+}
+
+/**
+ * Convert base64 data URL to Blob
+ */
+export function base64ToBlob(base64: string): Blob {
+  const bytes = base64ToUint8Array(base64);
   return new Blob([bytes], { type: 'image/png' });
 }
 
