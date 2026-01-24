@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { ImageGenerator } from '@/components/ImageGenerator';
-import { useContractConfigured } from '@/lib/sui/hooks';
-import { useLatestProfileNFT } from '@/lib/sui/hooks';
+import { useContractConfigured, useLatestProfileNFT } from '@/lib/sui/hooks';
 
 export const Route = createFileRoute('/')({ component: App });
 
