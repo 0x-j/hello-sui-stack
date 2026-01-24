@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { walrusClient } from '@/lib/walrus/client';
 import { parseWalrusUrl } from '@/lib/walrus/url';
+import { Download, ExternalLink, Loader2, AlertCircle, Database } from 'lucide-react';
 
 interface NFTCardProps {
   nft: ProfileNFTWithId;
@@ -13,10 +14,8 @@ export function NFTCard({ nft }: NFTCardProps) {
   const [imageError, setImageError] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  // Extract patch ID and blob ID from image URL
   const { patchId, blobId: blobIdFromUrl } = parseWalrusUrl(nft.image_url);
 
-  // Fetch blob metadata using Walrus SDK
   const { data: blobMetadata } = useQuery({
     queryKey: ['walrus-blob-metadata', patchId, blobIdFromUrl],
     queryFn: async () => {
@@ -25,12 +24,10 @@ export function NFTCard({ nft }: NFTCardProps) {
       try {
         let blobId = blobIdFromUrl;
 
-        // If blobId not in URL (old NFTs), get it from the quilt/patch using Walrus SDK
         if (!blobId) {
           const files = await walrusClient.getFiles({ ids: [patchId] });
           if (files.length > 0) {
             const file = files[0];
-            // Access the blob to get blobId
             const blob = await file.blob();
             blobId = (blob as any).blobId || (blob as any)._blobId;
           }
@@ -38,10 +35,7 @@ export function NFTCard({ nft }: NFTCardProps) {
 
         if (!blobId) return null;
 
-        // Get blob using Walrus SDK - this queries the blockchain
         const blob = await walrusClient.getBlob({ blobId });
-
-        // Get the blob's Sui object to access storage information
         const blobData = (blob as any)._blob || blob;
 
         if (blobData?.blobObject?.storage?.end_epoch) {
@@ -60,10 +54,8 @@ export function NFTCard({ nft }: NFTCardProps) {
     enabled: !!patchId,
   });
 
-  // Use blobId from metadata or URL for display
   const displayId = blobMetadata?.blobId || blobIdFromUrl || patchId;
 
-  // Handle download by fetching blob and creating download link
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
     setDownloading(true);
@@ -87,78 +79,114 @@ export function NFTCard({ nft }: NFTCardProps) {
   };
 
   return (
-    <div className="w-full max-w-[480px] bg-white rounded-2xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-200 flex flex-col sm:flex-row gap-4 p-4">
-      {/* Image */}
-      <div className="w-full sm:w-[142px] h-[142px] flex-shrink-0 relative rounded-lg overflow-hidden bg-gray-100">
-        {!imageLoaded && !imageError && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-blue-600"></div>
-          </div>
-        )}
-        {imageError ? (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500 flex-col gap-2">
-            <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-        ) : (
-          <img
-            src={nft.image_url}
-            alt={nft.name}
-            className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
-          />
-        )}
-      </div>
+    <div className="card-brutal bg-slate p-6 group">
+      <div className="flex flex-col sm:flex-row gap-6">
+        {/* Image */}
+        <div className="relative w-full sm:w-48 h-48 flex-shrink-0 border-[3px] border-magenta overflow-hidden bg-void">
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="animate-spin text-cyber" size={32} />
+            </div>
+          )}
+          {imageError ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <AlertCircle className="text-blood" size={48} />
+            </div>
+          ) : (
+            <img
+              src={nft.image_url}
+              alt={nft.name}
+              className={`w-full h-full object-cover transition-all duration-500 ${
+                imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              } group-hover:scale-110`}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+            />
+          )}
 
-      {/* Metadata */}
-      <div className="flex-1 flex flex-col justify-between min-w-0">
-        <div className="bg-blue-50 rounded-t-md px-3 py-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">End Epoch</span>
-          <span className="text-sm font-medium text-blue-600">
-            {blobMetadata?.endEpoch || 'N/A'}
-          </span>
-        </div>
-        <div className="bg-gray-50 px-3 py-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Walruscan</span>
-          <div className="flex-1 min-w-0 ml-2">
-            <a
-              href={`https://walruscan.com/testnet/blob/${displayId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-purple-600 hover:text-purple-700 underline block truncate text-right"
-              title={displayId}
-            >
-              {displayId}
-            </a>
-          </div>
-        </div>
-        <div className="bg-blue-50 px-3 py-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Associated Sui Object</span>
-          <div className="flex-1 min-w-0 ml-2">
-            <a
-              href={`https://testnet.suivision.xyz/object/${nft.objectId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-purple-600 hover:text-purple-700 underline block truncate text-right"
-              title={nft.objectId}
-            >
-              {nft.objectId}
-            </a>
-          </div>
-        </div>
-        <div className="bg-gray-50 rounded-b-md px-3 py-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Download Link</span>
-          <div className="flex-1 min-w-0 ml-2">
+          {/* Overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-void via-void/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="text-sm font-medium text-purple-600 hover:text-purple-700 underline block truncate text-right w-full text-right disabled:opacity-50"
-              title={downloading ? 'Downloading...' : displayId}
+              className="px-4 py-2 border-2 border-cyber bg-void text-cyber font-bold uppercase text-xs tracking-wider hover:bg-cyber hover:text-void transition-all duration-200 disabled:opacity-50"
             >
-              {downloading ? 'Downloading...' : displayId}
+              {downloading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="animate-spin" size={14} />
+                  Loading
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Download size={14} />
+                  Download
+                </span>
+              )}
             </button>
+          </div>
+        </div>
+
+        {/* Metadata */}
+        <div className="flex-1 flex flex-col justify-between min-w-0 space-y-3">
+          {/* Name */}
+          <div>
+            <h3 className="text-lg font-bold text-ghost mb-1 truncate">
+              {nft.name}
+            </h3>
+            <p className="text-xs text-smoke font-mono">
+              {new Date(Number(nft.created_at)).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          </div>
+
+          {/* Data Grid */}
+          <div className="space-y-2 font-mono text-xs">
+            {/* End Epoch */}
+            <div className="flex items-center justify-between py-2 border-b border-cyber/30">
+              <span className="text-smoke uppercase tracking-wider">End Epoch</span>
+              <span className="text-cyber font-bold">
+                {blobMetadata?.endEpoch || 'N/A'}
+              </span>
+            </div>
+
+            {/* Walruscan Link */}
+            <div className="flex items-center justify-between py-2 border-b border-magenta/30">
+              <span className="text-smoke uppercase tracking-wider">Walruscan</span>
+              <a
+                href={`https://walruscan.com/testnet/blob/${displayId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-magenta hover:text-ghost font-bold flex items-center gap-1 transition-colors"
+                title={displayId}
+              >
+                <span className="truncate max-w-[120px]">
+                  {displayId.slice(0, 8)}...{displayId.slice(-6)}
+                </span>
+                <ExternalLink size={12} />
+              </a>
+            </div>
+
+            {/* Sui Object Link */}
+            <div className="flex items-center justify-between py-2">
+              <span className="text-smoke uppercase tracking-wider">Sui Object</span>
+              <a
+                href={`https://testnet.suivision.xyz/object/${nft.objectId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-acid hover:text-ghost font-bold flex items-center gap-1 transition-colors"
+                title={nft.objectId}
+              >
+                <span className="truncate max-w-[120px]">
+                  {nft.objectId.slice(0, 8)}...{nft.objectId.slice(-6)}
+                </span>
+                <ExternalLink size={12} />
+              </a>
+            </div>
           </div>
         </div>
       </div>

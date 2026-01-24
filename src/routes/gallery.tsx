@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { useProfileNFTs } from '@/lib/sui/hooks';
 import { NFTCard } from '@/components/NFTCard';
+import { Image, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/gallery')({ component: Gallery });
 
@@ -11,14 +13,15 @@ function Gallery() {
 
   if (!account) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50">
-        <section className="py-20 px-6">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
-              NFT Gallery
+      <div className="min-h-screen bg-void grain-overlay scanline-container">
+        <section className="py-32 px-6">
+          <div className="max-w-2xl mx-auto text-center border-[3px] border-magenta bg-slate p-12">
+            <AlertCircle className="mx-auto mb-6 text-magenta" size={64} />
+            <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-tight text-ghost mb-6">
+              Wallet Not Connected
             </h1>
-            <p className="text-gray-700 text-lg">
-              Please connect your Sui wallet to view your NFTs
+            <p className="text-smoke font-mono text-lg mb-8">
+              Connect your Sui wallet to view your NFT gallery
             </p>
           </div>
         </section>
@@ -27,86 +30,122 @@ function Gallery() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50">
-      <section className="py-12 px-6 pb-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
-              Your NFT Gallery
+    <div className="min-h-screen bg-void grain-overlay scanline-container">
+      {/* Header Section */}
+      <section className="px-6 pt-16 pb-12 border-b-[3px] border-cyber">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="mb-8 opacity-0 animate-fade-in-up">
+            <div className="inline-block mb-4">
+              <span className="badge-brutal border-magenta text-magenta">
+                YOUR COLLECTION
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-none mb-4">
+              <span className="block text-ghost">NFT</span>
+              <span className="block text-cyber">Gallery_</span>
             </h1>
-            <p className="text-gray-700 text-lg">
-              View all your minted profile NFTs
+            <p className="text-smoke font-mono text-lg max-w-2xl">
+              View all your minted profile NFTs stored on Walrus
             </p>
           </div>
+        </div>
+      </section>
 
+      {/* Gallery Content */}
+      <section className="py-12 px-6 pb-20">
+        <div className="max-w-[1600px] mx-auto">
+          {/* Loading State */}
           {isLoading && (
-            <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="w-full max-w-[480px] bg-white border-2 border-gray-200 rounded-2xl animate-pulse flex flex-col sm:flex-row gap-4 p-4"
+                  className="border-[3px] border-smoke/30 bg-slate p-6 opacity-0 animate-fade-in-up"
+                  style={{ animationDelay: `${i * 0.1}s` }}
                 >
-                  <div className="w-full sm:w-[142px] h-[142px] bg-gray-200 rounded-lg flex-shrink-0"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-8 bg-gray-200 rounded"></div>
-                    <div className="h-8 bg-gray-200 rounded"></div>
-                    <div className="h-8 bg-gray-200 rounded"></div>
-                    <div className="h-8 bg-gray-200 rounded"></div>
+                  <div className="flex gap-6">
+                    <div className="w-40 h-40 bg-smoke/20 border-[3px] border-smoke/30 animate-pulse"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-6 bg-smoke/20 animate-pulse"></div>
+                      <div className="h-6 bg-smoke/20 animate-pulse"></div>
+                      <div className="h-6 bg-smoke/20 animate-pulse"></div>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
 
+          {/* Error State */}
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
-              <p className="text-red-700 font-medium">
-                Error loading NFTs: {error.message}
-              </p>
-            </div>
-          )}
-
-          {!isLoading && !error && nfts && nfts.length === 0 && (
-            <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 mb-6 shadow-inner">
-                <svg
-                  className="w-12 h-12 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
+            <div className="border-[3px] border-blood bg-slate p-8 opacity-0 animate-fade-in-up">
+              <div className="flex items-start gap-4">
+                <AlertCircle className="text-blood flex-shrink-0" size={32} />
+                <div>
+                  <h3 className="font-bold uppercase tracking-wider text-blood text-xl mb-2">
+                    Error Loading NFTs
+                  </h3>
+                  <p className="text-smoke font-mono">{error.message}</p>
+                </div>
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                No NFTs Yet
-              </h2>
-              <p className="text-gray-600 text-lg mb-8">
-                Generate and mint your first profile NFT to see it here
-              </p>
-              <a
-                href="/"
-                className="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200"
-              >
-                ✨ Create Your First NFT
-              </a>
             </div>
           )}
 
-          {!isLoading && !error && nfts && nfts.length > 0 && (
-            <div className="flex flex-col gap-6">
-              {nfts.map((nft) => (
-                <NFTCard key={nft.objectId} nft={nft} />
-              ))}
+          {/* Empty State */}
+          {!isLoading && !error && nfts && nfts.length === 0 && (
+            <div className="text-center py-20 opacity-0 animate-fade-in-up">
+              <div className="max-w-2xl mx-auto border-[3px] border-cyber bg-slate p-12">
+                <div className="relative inline-block mb-8">
+                  <div className="absolute inset-0 bg-cyber blur-xl opacity-50"></div>
+                  <Image className="relative text-cyber" size={80} strokeWidth={2} />
+                </div>
+                <h2 className="text-4xl font-bold uppercase tracking-tight text-ghost mb-4">
+                  No NFTs Yet
+                </h2>
+                <p className="text-smoke font-mono text-lg mb-8">
+                  Generate and mint your first profile NFT to start your collection
+                </p>
+                <Link
+                  to="/"
+                  className="inline-block px-8 py-4 border-[3px] border-cyber bg-void text-cyber font-bold uppercase tracking-wider hover:bg-cyber hover:text-void transition-all duration-200"
+                  style={{ boxShadow: '6px 6px 0px var(--color-cyber)' }}
+                >
+                  Create First NFT
+                </Link>
+              </div>
             </div>
+          )}
+
+          {/* NFT Grid */}
+          {!isLoading && !error && nfts && nfts.length > 0 && (
+            <>
+              {/* Stats Header */}
+              <div className="mb-8 flex items-center gap-4 opacity-0 animate-fade-in-up">
+                <Sparkles className="text-cyan" size={24} />
+                <span className="text-smoke font-mono text-lg">
+                  <span className="text-cyber font-bold">{nfts.length}</span> NFT{nfts.length !== 1 ? 's' : ''} in collection
+                </span>
+              </div>
+
+              {/* Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {nfts.map((nft, index) => (
+                  <div
+                    key={nft.objectId}
+                    className="opacity-0 animate-fade-in-up"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <NFTCard nft={nft} />
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </section>
+
+      {/* Bottom decorative line */}
+      <div className="border-t-[3px] border-magenta"></div>
     </div>
   );
 }

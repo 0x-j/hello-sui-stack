@@ -9,24 +9,17 @@ import { formatCostDisplay, formatTotalCost } from '@/lib/walrus/costFormatting'
 import { base64ToBlob } from '@/lib/walrus/upload';
 import { useNavigate } from '@tanstack/react-router';
 import { UPLOAD_TIP_SUI } from '@/lib/walrus/client';
+import { Loader2, CheckCircle2, Circle, AlertCircle } from 'lucide-react';
 
-// Helper function to get button class based on state
-function getStepButtonClass(isReady: boolean, isLoading: boolean, isCompleted: boolean): string {
-  const baseClass = 'w-full py-6 px-8 rounded-xl font-bold text-lg transition-all duration-200 flex items-center justify-center';
-
-  if (isCompleted) {
-    // Completed - green
-    return `${baseClass} bg-green-600 text-white cursor-default`;
-  } else if (isLoading) {
-    // Loading - semi-transparent teal
-    return `${baseClass} bg-teal-500/50 text-white cursor-wait`;
-  } else if (isReady) {
-    // Ready to interact - bright teal
-    return `${baseClass} bg-teal-500 text-white hover:bg-teal-600 cursor-pointer`;
-  } else {
-    // Disabled - gray
-    return `${baseClass} bg-gray-500/50 text-gray-300 cursor-not-allowed`;
+// Helper function to get step status icon
+function getStepIcon(isActive: boolean, isCompleted: boolean, isLoading: boolean) {
+  if (isLoading) {
+    return <Loader2 className="animate-spin" size={20} />;
   }
+  if (isCompleted) {
+    return <CheckCircle2 size={20} />;
+  }
+  return <Circle size={20} className={isActive ? 'opacity-100' : 'opacity-30'} />;
 }
 
 export function ImageGenerator() {
@@ -45,13 +38,9 @@ export function ImageGenerator() {
   const [walrusUrl, setWalrusUrl] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
 
-  // Upload hook for step-by-step process
   const walrusUpload = useWalrusUpload();
-
-  // Storage cost calculation (1 epoch)
   const storageCost = useStorageCost(imageSize, 1);
 
-  // Calculate image size when generated
   useEffect(() => {
     if (generatedImage) {
       const blob = base64ToBlob(generatedImage);
@@ -69,16 +58,12 @@ export function ImageGenerator() {
     setGeneratedImage(null);
 
     try {
-      // Step 1: Pay for image generation
       const paymentTx = buildPaymentTransaction();
 
       signAndExecute(
-        {
-          transaction: paymentTx,
-        },
+        { transaction: paymentTx },
         {
           onSuccess: async (result) => {
-            // Step 2: Generate image via server function
             setStatus('generating');
 
             try {
@@ -90,7 +75,6 @@ export function ImageGenerator() {
               });
 
               if (response.success && response.image) {
-                // Server already returns full data URL, use it directly
                 setGeneratedImage(response.image);
                 setNftName(`Profile: ${prompt.slice(0, 30)}${prompt.length > 30 ? '...' : ''}`);
                 setNftDescription(`AI-generated profile picture based on: "${prompt}"`);
@@ -118,14 +102,12 @@ export function ImageGenerator() {
     }
   };
 
-  // Step 1: Encode and prepare for registration
   const handlePrepareUpload = async () => {
     if (!generatedImage) return;
     setError(null);
     await walrusUpload.encodeFile(generatedImage);
   };
 
-  // Step 2: Register blob on-chain
   const handleRegisterBlob = async () => {
     if (!account) return;
     setError(null);
@@ -138,7 +120,6 @@ export function ImageGenerator() {
     }
   };
 
-  // Step 3: Upload to network
   const handleUploadToNetwork = async () => {
     setError(null);
 
@@ -150,13 +131,11 @@ export function ImageGenerator() {
     }
   };
 
-  // Step 3: Certify upload
   const handleCertifyUpload = async () => {
     if (!account) return;
     setError(null);
 
     try {
-      // Certify the blob
       const url = await walrusUpload.certifyBlob(signAndExecuteAsync);
       setWalrusUrl(url);
     } catch (err: any) {
@@ -165,23 +144,16 @@ export function ImageGenerator() {
     }
   };
 
-  // Step 4: Mint NFT
   const handleMintNFT = async () => {
     if (!account || !walrusUrl) return;
     setIsMinting(true);
     setError(null);
 
     try {
-      const mintTx = buildMintNFTTransaction(
-        nftName,
-        nftDescription,
-        walrusUrl
-      );
+      const mintTx = buildMintNFTTransaction(nftName, nftDescription, walrusUrl);
 
       signAndExecute(
-        {
-          transaction: mintTx,
-        },
+        { transaction: mintTx },
         {
           onSuccess: (result) => {
             setStatus('success');
@@ -192,11 +164,7 @@ export function ImageGenerator() {
             setWalrusUrl(null);
             setIsMinting(false);
             walrusUpload.reset();
-
-            // Invalidate NFT queries to refetch
             queryClient.invalidateQueries({ queryKey: ['profile-nfts'] });
-
-            // Redirect to gallery page
             navigate({ to: '/gallery' });
           },
           onError: (err) => {
@@ -213,7 +181,6 @@ export function ImageGenerator() {
     }
   };
 
-  // Prepare upload when image is generated
   useEffect(() => {
     if (generatedImage && status === 'success') {
       handlePrepareUpload();
@@ -222,32 +189,34 @@ export function ImageGenerator() {
 
   if (!account) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600 text-lg">
-          Please connect your Sui wallet to generate profile images
+      <div className="text-center py-16 border-[3px] border-magenta bg-void p-8">
+        <AlertCircle className="mx-auto mb-4 text-magenta" size={48} />
+        <p className="text-smoke font-mono text-lg uppercase tracking-wider">
+          Connect wallet to generate
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Prompt Input */}
-      <div className="space-y-2">
-        <label htmlFor="prompt" className="text-sm font-semibold text-gray-700 block">
-          Describe your profile image
+      <div className="space-y-4">
+        <label htmlFor="prompt" className="text-sm font-bold uppercase tracking-wider text-cyber block">
+          Input Prompt_
         </label>
         <textarea
           id="prompt"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g., A futuristic astronaut with neon colors"
-          className="w-full min-h-28 p-4 border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+          placeholder="DESCRIBE YOUR PROFILE IMAGE..."
+          className="input-brutal w-full min-h-32 resize-none placeholder:uppercase"
           disabled={status !== 'idle' && status !== 'success' && status !== 'error'}
         />
-        <p className="text-xs text-gray-600 font-medium">
-          💰 Cost: {getPaymentAmountInSui()} SUI per generation
-        </p>
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <span className="text-smoke">COST:</span>
+          <span className="text-cyber font-bold">{getPaymentAmountInSui()} SUI</span>
+        </div>
       </div>
 
       {/* Generate Button */}
@@ -255,183 +224,192 @@ export function ImageGenerator() {
         <button
           onClick={handleGenerate}
           disabled={!prompt.trim() || (status !== 'idle' && status !== 'error')}
-          className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-200"
+          className="btn-brutal w-full"
         >
-          {status === 'paying' && '⏳ Processing Payment...'}
-          {status === 'generating' && '🎨 Generating Image...'}
-          {(status === 'idle' || status === 'error') && '✨ Generate Image'}
+          {status === 'paying' && (
+            <span className="flex items-center gap-3">
+              <Loader2 className="animate-spin" size={20} />
+              Processing Payment
+            </span>
+          )}
+          {status === 'generating' && (
+            <span className="flex items-center gap-3">
+              <Loader2 className="animate-spin" size={20} />
+              Generating Image
+            </span>
+          )}
+          {(status === 'idle' || status === 'error') && 'Generate Image'}
         </button>
       )}
 
       {/* Error Message */}
       {(error || walrusUpload.error) && (
-        <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
-          <p className="text-sm text-red-700 font-medium">❌ {error || walrusUpload.error}</p>
+        <div className="border-[3px] border-blood bg-slate p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="text-blood flex-shrink-0" size={20} />
+            <p className="text-sm text-blood font-mono font-bold">
+              {error || walrusUpload.error}
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Generated Image */}
+      {/* Generated Image & Upload Flow */}
       {generatedImage && (
-        <div className="space-y-5">
-          <div className="border-4 border-blue-100 rounded-2xl overflow-hidden shadow-xl">
-            <img
-              src={generatedImage}
-              alt="Generated profile"
-              className="w-full aspect-square object-cover"
-            />
+        <div className="space-y-8">
+          {/* Generated Image */}
+          <div className="relative group">
+            <div className="absolute -inset-2 bg-gradient-to-r from-cyber via-magenta to-cyber opacity-50 blur-xl group-hover:opacity-75 transition-opacity"></div>
+            <div className="relative border-[5px] border-cyber overflow-hidden">
+              <img
+                src={generatedImage}
+                alt="Generated profile"
+                className="w-full aspect-square object-cover"
+              />
+            </div>
           </div>
 
-          {/* NFT Metadata Inputs */}
-          <div className="space-y-4 bg-gray-50 p-5 rounded-xl border border-gray-200">
+          {/* NFT Metadata */}
+          <div className="space-y-4 border-[3px] border-magenta bg-slate p-6">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-magenta mb-4">
+              NFT Metadata_
+            </h3>
+
             <div>
-              <label htmlFor="nft-name" className="text-sm font-semibold text-gray-700 block mb-2">
-                NFT Name
+              <label htmlFor="nft-name" className="text-xs font-bold uppercase tracking-wider text-smoke block mb-2">
+                Name
               </label>
               <input
                 id="nft-name"
                 type="text"
                 value={nftName}
                 onChange={(e) => setNftName(e.target.value)}
-                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                className="input-brutal w-full"
                 disabled={walrusUpload.isRegistering || walrusUpload.isRelaying || walrusUpload.isCertifying || isMinting}
               />
             </div>
 
             <div>
-              <label htmlFor="nft-description" className="text-sm font-semibold text-gray-700 block mb-2">
-                NFT Description
+              <label htmlFor="nft-description" className="text-xs font-bold uppercase tracking-wider text-smoke block mb-2">
+                Description
               </label>
               <textarea
                 id="nft-description"
                 value={nftDescription}
                 onChange={(e) => setNftDescription(e.target.value)}
-                className="w-full p-3 border-2 border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                className="input-brutal w-full resize-none"
                 rows={3}
                 disabled={walrusUpload.isRegistering || walrusUpload.isRelaying || walrusUpload.isCertifying || isMinting}
               />
             </div>
           </div>
 
-          {/* Upload Cost Estimate */}
-          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 space-y-3">
-            <h3 className="text-xl font-bold text-white mb-4">Upload Cost Estimate</h3>
+          {/* Cost Breakdown */}
+          <div className="border-[3px] border-acid bg-void p-6 space-y-3 font-mono">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-acid mb-4">
+              Upload Cost_
+            </h3>
 
-            <div className="flex justify-between items-center text-gray-300">
-              <span>Storage Cost:</span>
-              <span className="font-mono text-white">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-smoke">Storage</span>
+              <span className="text-ghost font-bold">
                 {formatCostDisplay(storageCost.storageCost, 'WAL')}
               </span>
             </div>
 
-            <div className="flex justify-between items-center text-gray-300">
-              <span>Write Cost:</span>
-              <span className="font-mono text-white">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-smoke">Write</span>
+              <span className="text-ghost font-bold">
                 {formatCostDisplay(storageCost.writeCost, 'WAL')}
               </span>
             </div>
 
-            <div className="flex justify-between items-center text-gray-300">
-              <span>Tip Amount:</span>
-              <span className="font-mono text-white">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-smoke">Tip</span>
+              <span className="text-ghost font-bold">
                 {imageSize > 0 ? formatCostDisplay(UPLOAD_TIP_SUI.toString(), 'SUI') : '---'}
               </span>
             </div>
 
-            <div className="border-t border-gray-700 pt-3 mt-3">
-              <div className="flex justify-between items-center text-gray-300">
-                <span className="font-bold text-white">Total Cost:</span>
-                <span className="font-mono text-white font-bold">
+            <div className="border-t-2 border-acid pt-3 mt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-acid font-bold uppercase tracking-wider text-sm">Total</span>
+                <span className="text-acid font-bold text-lg">
                   {formatTotalCost(storageCost.totalCost, UPLOAD_TIP_SUI)}
                 </span>
               </div>
             </div>
 
-            <p className="text-xs text-gray-400 mt-3">
-              Actual costs may vary based on current network conditions and file size.
+            <p className="text-xs text-smoke opacity-60 mt-3">
+              * Costs vary by network conditions
             </p>
           </div>
 
-          {/* Step-by-Step Upload Buttons */}
-          <div className="space-y-4">
-            {/* Step 1: Register Blob */}
+          {/* Upload Steps */}
+          <div className="space-y-3">
+            {/* Step 1 */}
             <button
               onClick={handleRegisterBlob}
               disabled={!walrusUpload.canRegister || walrusUpload.isRegistering || !account}
-              className={getStepButtonClass(walrusUpload.canRegister && !!account, walrusUpload.isRegistering, walrusUpload.canRelay || walrusUpload.canCertify)}
+              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-between ${
+                walrusUpload.canRelay || walrusUpload.canCertify
+                  ? 'border-cyber bg-cyber/10 text-cyber cursor-default'
+                  : walrusUpload.canRegister && !!account
+                  ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
+                  : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
+              }`}
             >
-              <span className="text-2xl font-bold">1. Register Blob</span>
-              {walrusUpload.isRegistering && (
-                <span className="ml-2 animate-spin">⏳</span>
-              )}
-              {(walrusUpload.canRelay || walrusUpload.canCertify) && (
-                <span className="ml-2">✓</span>
-              )}
-              {!account && (
-                <span className="ml-2 text-sm">(Connect Wallet First)</span>
-              )}
+              <span className="flex items-center gap-3">
+                {getStepIcon(walrusUpload.canRegister, walrusUpload.canRelay || walrusUpload.canCertify, walrusUpload.isRegistering)}
+                <span>01. Register Blob</span>
+              </span>
+              {!account && <span className="text-xs">Connect Wallet</span>}
             </button>
 
-            {/* Arrow/Chevron */}
-            <div className="flex justify-center">
-              <svg className={`w-8 h-8 ${walrusUpload.canRelay || walrusUpload.canCertify ? 'text-green-500' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-
-            {/* Step 2: Upload to Network */}
+            {/* Step 2 */}
             <button
               onClick={handleUploadToNetwork}
               disabled={!walrusUpload.canRelay || walrusUpload.isRelaying}
-              className={getStepButtonClass(walrusUpload.canRelay, walrusUpload.isRelaying, walrusUpload.canCertify)}
+              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${
+                walrusUpload.canCertify
+                  ? 'border-cyber bg-cyber/10 text-cyber cursor-default'
+                  : walrusUpload.canRelay
+                  ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
+                  : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
+              }`}
             >
-              <span className="text-2xl font-bold">2. Upload to Network</span>
-              {walrusUpload.isRelaying && (
-                <span className="ml-2 animate-spin">⏳</span>
-              )}
-              {walrusUpload.canCertify && (
-                <span className="ml-2">✓</span>
-              )}
+              {getStepIcon(walrusUpload.canRelay, walrusUpload.canCertify, walrusUpload.isRelaying)}
+              <span>02. Upload to Network</span>
             </button>
 
-            {/* Arrow/Chevron */}
-            <div className="flex justify-center">
-              <svg className={`w-8 h-8 ${walrusUpload.canCertify ? 'text-green-500' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-
-            {/* Step 3: Certify Upload */}
+            {/* Step 3 */}
             <button
               onClick={handleCertifyUpload}
               disabled={!walrusUpload.canCertify || walrusUpload.isCertifying}
-              className={getStepButtonClass(walrusUpload.canCertify, walrusUpload.isCertifying, !!walrusUrl)}
+              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${
+                !!walrusUrl
+                  ? 'border-cyber bg-cyber/10 text-cyber cursor-default'
+                  : walrusUpload.canCertify
+                  ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
+                  : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
+              }`}
             >
-              <span className="text-2xl font-bold">3. Certify Upload</span>
-              {walrusUpload.isCertifying && (
-                <span className="ml-2 animate-spin">⏳</span>
-              )}
-              {walrusUrl && (
-                <span className="ml-2">✓</span>
-              )}
+              {getStepIcon(walrusUpload.canCertify, !!walrusUrl, walrusUpload.isCertifying)}
+              <span>03. Certify Upload</span>
             </button>
 
-            {/* Arrow/Chevron */}
-            <div className="flex justify-center">
-              <svg className={`w-8 h-8 ${walrusUrl ? 'text-green-500' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-
-            {/* Step 4: Mint NFT */}
+            {/* Step 4 */}
             <button
               onClick={handleMintNFT}
               disabled={!walrusUrl || isMinting || !nftName.trim()}
-              className={getStepButtonClass(!!walrusUrl && !!nftName.trim(), isMinting, false)}
+              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${
+                !!walrusUrl && !!nftName.trim()
+                  ? 'border-magenta bg-void text-magenta hover:bg-magenta hover:text-void'
+                  : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
+              }`}
             >
-              <span className="text-2xl font-bold">4. Mint NFT</span>
-              {isMinting && (
-                <span className="ml-2 animate-spin">⏳</span>
-              )}
+              {getStepIcon(!!walrusUrl && !!nftName.trim(), false, isMinting)}
+              <span>04. Mint NFT</span>
             </button>
           </div>
 
@@ -446,7 +424,7 @@ export function ImageGenerator() {
               walrusUpload.reset();
             }}
             disabled={walrusUpload.isRegistering || walrusUpload.isRelaying || walrusUpload.isCertifying || isMinting}
-            className="w-full px-6 py-3 border-2 border-gray-300 bg-white text-gray-700 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            className="w-full px-6 py-4 border-[3px] border-blood bg-void text-blood font-bold uppercase tracking-wider hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
           >
             Cancel
           </button>
