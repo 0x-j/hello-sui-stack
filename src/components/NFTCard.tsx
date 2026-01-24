@@ -10,6 +10,7 @@ interface NFTCardProps {
 export function NFTCard({ nft }: NFTCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const client = useSuiClient();
 
   // Extract patch ID from image URL (format: ${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId})
@@ -33,6 +34,29 @@ export function NFTCard({ nft }: NFTCardProps) {
     },
     enabled: !!nft.objectId,
   });
+
+  // Handle download by fetching blob and creating download link
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setDownloading(true);
+
+    try {
+      const response = await fetch(nft.image_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${nft.name}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download failed:', error);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-[480px] bg-white rounded-2xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-200 flex flex-col sm:flex-row gap-4 p-4">
@@ -99,15 +123,14 @@ export function NFTCard({ nft }: NFTCardProps) {
         <div className="bg-gray-50 rounded-b-md px-3 py-2 flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">Download Link</span>
           <div className="flex-1 min-w-0 ml-2">
-            <a
-              href={nft.image_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-purple-600 hover:text-purple-700 underline block truncate text-right"
-              title={displayId}
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="text-sm font-medium text-purple-600 hover:text-purple-700 underline block truncate text-right w-full text-right disabled:opacity-50"
+              title={downloading ? 'Downloading...' : displayId}
             >
-              {displayId}
-            </a>
+              {downloading ? 'Downloading...' : displayId}
+            </button>
           </div>
         </div>
       </div>
