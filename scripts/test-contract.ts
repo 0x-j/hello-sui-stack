@@ -1,9 +1,9 @@
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { SuiClient } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
 import * as dotenv from 'dotenv';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { createSuiClient } from './utils/sui.js';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -11,11 +11,6 @@ const __dirname = dirname(__filename);
 
 // Load environment variables
 dotenv.config({ path: join(__dirname, '../.env.local') });
-
-const NETWORK = process.env.VITE_SUI_NETWORK || 'testnet';
-const RPC_URL = NETWORK === 'mainnet'
-  ? 'https://fullnode.mainnet.sui.io:443'
-  : 'https://fullnode.testnet.sui.io:443';
 
 const PACKAGE_ID = process.env.VITE_CONTRACT_PACKAGE_ID;
 const PAYMENT_CONFIG_ID = process.env.VITE_PAYMENT_CONFIG_ID;
@@ -37,7 +32,7 @@ async function testContract() {
 
   const keypair = Ed25519Keypair.deriveKeypair(seedPhrase);
   const address = keypair.toSuiAddress();
-  const client = new SuiClient({ url: RPC_URL });
+  const client = createSuiClient();
 
   console.log('📝 Test account:', address);
   console.log('📦 Package ID:', PACKAGE_ID);

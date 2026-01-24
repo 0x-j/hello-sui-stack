@@ -1,12 +1,11 @@
 import { createServerFn } from '@tanstack/react-start';
 import { generateText } from 'ai';
+import { getFullnodeUrl } from '@mysten/sui/client';
 import { SuiClient } from '@mysten/sui/client';
 
 const API_KEY = process.env.AI_GATEWAY_API_KEY;
-const NETWORK = process.env.VITE_SUI_NETWORK || 'testnet';
-const RPC_URL = NETWORK === 'mainnet'
-  ? 'https://fullnode.mainnet.sui.io:443'
-  : 'https://fullnode.testnet.sui.io:443';
+const NETWORK = (process.env.VITE_SUI_NETWORK || 'testnet') as 'testnet' | 'mainnet';
+const RPC_URL = getFullnodeUrl(NETWORK);
 
 interface GenerateImageInput {
   prompt: string;

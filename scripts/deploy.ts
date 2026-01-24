@@ -1,11 +1,11 @@
 import { execSync } from 'child_process';
 import { writeFileSync, readFileSync } from 'fs';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { SuiClient } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
 import * as dotenv from 'dotenv';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { getNetwork, createSuiClient } from './utils/sui.js';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -14,10 +14,7 @@ const __dirname = dirname(__filename);
 // Load environment variables
 dotenv.config({ path: join(__dirname, '../.env.local') });
 
-const NETWORK = process.env.VITE_SUI_NETWORK || 'testnet';
-const RPC_URL = NETWORK === 'mainnet'
-  ? 'https://fullnode.mainnet.sui.io:443'
-  : 'https://fullnode.testnet.sui.io:443';
+const NETWORK = getNetwork();
 
 async function deploy() {
   console.log('🚀 Starting deployment to Sui', NETWORK);
@@ -34,7 +31,7 @@ async function deploy() {
   console.log('📝 Deployer address:', deployer);
 
   // 2. Initialize Sui client
-  const client = new SuiClient({ url: RPC_URL });
+  const client = createSuiClient();
 
   // 3. Check balance
   const balance = await client.getBalance({ owner: deployer });
