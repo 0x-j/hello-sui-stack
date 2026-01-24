@@ -2,6 +2,7 @@ import { ProfileNFTWithId } from '@/types/sui';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { walrusClient } from '@/lib/walrus/client';
+import { parseWalrusUrl } from '@/lib/walrus/url';
 
 interface NFTCardProps {
   nft: ProfileNFTWithId;
@@ -13,11 +14,7 @@ export function NFTCard({ nft }: NFTCardProps) {
   const [downloading, setDownloading] = useState(false);
 
   // Extract patch ID and blob ID from image URL
-  // Format: ${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId}?blobId=${blobId}
-  const urlParts = nft.image_url.split('/by-quilt-patch-id/');
-  const pathAndQuery = urlParts.length > 1 ? urlParts[1] : '';
-  const [patchId, queryString] = pathAndQuery.split('?');
-  const blobIdFromUrl = queryString ? new URLSearchParams(queryString).get('blobId') || '' : '';
+  const { patchId, blobId: blobIdFromUrl } = parseWalrusUrl(nft.image_url);
 
   // Fetch blob metadata using Walrus SDK
   const { data: blobMetadata } = useQuery({
