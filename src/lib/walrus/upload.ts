@@ -90,14 +90,15 @@ export async function uploadImageToWalrus(
       throw new Error('No files were uploaded');
     }
 
-    const blobId = fileList[0].blobId;
+    // Use the patch ID (quilt-patch-id) for retrieving the blob
+    const patchId = fileList[0].id;
 
-    // Step 9: Construct Walrus URL
+    // Step 9: Construct Walrus URL using the correct aggregator endpoint
     if (!AGGREGATOR_URL) {
       throw new Error('VITE_WALRUS_AGGREGATOR_URL not configured');
     }
 
-    return `${AGGREGATOR_URL}/v1/${blobId}`;
+    return `${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId}`;
 
   } catch (error) {
     console.error('Walrus upload error:', error);

@@ -12,8 +12,12 @@ export function NFTCard({ nft }: NFTCardProps) {
   const [imageError, setImageError] = useState(false);
   const client = useSuiClient();
 
-  // Extract blob ID from image URL (format: ${AGGREGATOR_URL}/v1/${blobId})
-  const blobId = nft.image_url.split('/v1/')[1] || '';
+  // Extract patch ID from image URL (format: ${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId})
+  const urlParts = nft.image_url.split('/by-quilt-patch-id/');
+  const patchId = urlParts.length > 1 ? urlParts[1] : '';
+
+  // Use patchId for display in Walruscan and download links
+  const displayId = patchId;
 
   // Fetch object details to get storage info
   const { data: objectData } = useQuery({
@@ -68,13 +72,13 @@ export function NFTCard({ nft }: NFTCardProps) {
           <span className="text-sm font-medium text-gray-700">Walruscan</span>
           <div className="flex-1 min-w-0 ml-2">
             <a
-              href={`https://walruscan.com/testnet/blob/${blobId}`}
+              href={`https://walruscan.com/testnet/blob/${displayId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-purple-600 hover:text-purple-700 underline block truncate text-right"
-              title={blobId}
+              title={displayId}
             >
-              {blobId}
+              {displayId}
             </a>
           </div>
         </div>
@@ -100,9 +104,9 @@ export function NFTCard({ nft }: NFTCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-purple-600 hover:text-purple-700 underline block truncate text-right"
-              title={blobId}
+              title={displayId}
             >
-              {blobId}
+              {displayId}
             </a>
           </div>
         </div>
