@@ -1,6 +1,5 @@
 import { WalrusFile } from '@mysten/walrus';
 import { walrusClient } from './client';
-import type { SignAndExecuteTransaction } from '@mysten/dapp-kit';
 
 const AGGREGATOR_URL = import.meta.env.VITE_WALRUS_AGGREGATOR_URL;
 
@@ -34,7 +33,7 @@ export function base64ToBlob(base64: string): Blob {
  */
 export async function uploadImageToWalrus(
   base64Image: string,
-  signAndExecuteTransaction: SignAndExecuteTransaction,
+  signAndExecuteTransaction: any,
   userAddress: string
 ): Promise<string> {
   try {
