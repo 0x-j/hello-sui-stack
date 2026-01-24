@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { WalrusFile } from '@mysten/walrus';
 import { walrusClient } from '@/lib/walrus/client';
 import { base64ToBlob } from '@/lib/walrus/upload';
+import { buildWalrusUrl } from '@/lib/walrus/url';
 
 type UploadState =
   | 'idle'
@@ -162,12 +163,7 @@ export function useWalrusUpload(): UseWalrusUploadResult {
       const patchId = fileInfo.id;
       const blobId = fileInfo.blobId;
 
-      const AGGREGATOR_URL = import.meta.env.VITE_WALRUS_AGGREGATOR_URL;
-      if (!AGGREGATOR_URL) {
-        throw new Error('VITE_WALRUS_AGGREGATOR_URL not configured');
-      }
-
-      const url = `${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId}?blobId=${blobId}`;
+      const url = buildWalrusUrl(patchId, blobId);
       setBlobUrl(url);
       setState('idle');
 
