@@ -1,7 +1,6 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { CONTRACT_CONFIG } from '@/types/sui';
-
-const PAYMENT_AMOUNT = 10_000_000; // 0.01 SUI in MIST
+import { PAYMENT_AMOUNT } from './constants';
 
 /**
  * Build a transaction to pay for image generation

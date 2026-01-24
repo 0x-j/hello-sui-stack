@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createSuiClient } from './utils/sui.js';
+import { PAYMENT_AMOUNT } from './utils/constants.js';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -51,7 +52,7 @@ async function testContract() {
     const tx = new Transaction();
 
     // Split 0.01 SUI from gas
-    const [paymentCoin] = tx.splitCoins(tx.gas, [10_000_000]); // 0.01 SUI
+    const [paymentCoin] = tx.splitCoins(tx.gas, [PAYMENT_AMOUNT]);
 
     // Call pay_for_generation
     tx.moveCall({
