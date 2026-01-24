@@ -1,6 +1,5 @@
 import { ProfileNFTWithId } from '@/types/sui';
 import { useState } from 'react';
-import { useSuiClient } from '@mysten/dapp-kit';
 import { useQuery } from '@tanstack/react-query';
 import { walrusClient } from '@/lib/walrus/client';
 
@@ -12,7 +11,6 @@ export function NFTCard({ nft }: NFTCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const client = useSuiClient();
 
   // Extract patch ID and blob ID from image URL
   // Format: ${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId}?blobId=${blobId}
