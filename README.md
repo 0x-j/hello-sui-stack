@@ -261,6 +261,6 @@ This project was built for the Sui hackathon. Feel free to fork and improve!
 ## Links
 
 - [Sui Documentation](https://docs.sui.io/)
-- [Walrus Documentation](https://docs.walrus.site/)
+- [Walrus Documentation](https://docs.walrus.app/)
 - [TanStack Start](https://tanstack.com/start)
 - [Vercel AI SDK](https://sdk.vercel.ai/)
