@@ -2,9 +2,9 @@
 module profile_nft::profile_nft_tests;
 
 use profile_nft::profile_nft::{Self, ProfileNFT, PaymentConfig};
-use sui::test_scenario::{Self as ts, Scenario};
 use sui::coin::{Self, Coin};
 use sui::sui::SUI;
+use sui::test_scenario::{Self as ts, Scenario};
 
 // Test addresses
 const ADMIN: address = @0xAD;
@@ -125,7 +125,7 @@ fun test_pay_for_generation_with_overpayment() {
 }
 
 #[test]
-#[expected_failure(abort_code = 0)] // EInsufficientPayment
+#[expected_failure(abort_code = profile_nft::EInsufficientPayment)] // EInsufficientPayment
 fun test_pay_for_generation_insufficient_payment() {
     let mut scenario = init_test_scenario();
 
@@ -162,7 +162,7 @@ fun test_mint_nft_creates_nft() {
             name,
             description,
             image_url,
-            ts::ctx(&mut scenario)
+            ts::ctx(&mut scenario),
         );
     };
 
@@ -173,8 +173,14 @@ fun test_mint_nft_creates_nft() {
 
         // Verify NFT properties
         assert!(profile_nft::get_name(&nft) == std::string::utf8(b"Test Profile NFT"), 0);
-        assert!(profile_nft::get_description(&nft) == std::string::utf8(b"A test profile picture"), 1);
-        assert!(profile_nft::get_image_url(&nft) == std::string::utf8(b"https://walrus.test/blob123"), 2);
+        assert!(
+            profile_nft::get_description(&nft) == std::string::utf8(b"A test profile picture"),
+            1,
+        );
+        assert!(
+            profile_nft::get_image_url(&nft) == std::string::utf8(b"https://walrus.test/blob123"),
+            2,
+        );
         assert!(profile_nft::get_creator(&nft) == USER1, 3);
         // Timestamp will be 0 in test environment
         let _ = profile_nft::get_created_at(&nft);
@@ -196,7 +202,7 @@ fun test_mint_multiple_nfts() {
             b"NFT #1",
             b"First NFT",
             b"https://walrus.test/blob1",
-            ts::ctx(&mut scenario)
+            ts::ctx(&mut scenario),
         );
     };
 
@@ -207,7 +213,7 @@ fun test_mint_multiple_nfts() {
             b"NFT #2",
             b"Second NFT",
             b"https://walrus.test/blob2",
-            ts::ctx(&mut scenario)
+            ts::ctx(&mut scenario),
         );
     };
 
@@ -240,7 +246,7 @@ fun test_transfer_nft() {
             b"Transfer Test NFT",
             b"Testing NFT transfer",
             b"https://walrus.test/transfer",
-            ts::ctx(&mut scenario)
+            ts::ctx(&mut scenario),
         );
     };
 
@@ -289,7 +295,7 @@ fun test_update_price() {
 }
 
 #[test]
-#[expected_failure(abort_code = 1)] // EInvalidPrice
+#[expected_failure(abort_code = profile_nft::EInvalidPrice)] // EInvalidPrice
 fun test_update_price_unauthorized() {
     let mut scenario = init_test_scenario();
 
@@ -308,7 +314,7 @@ fun test_update_price_unauthorized() {
 }
 
 #[test]
-#[expected_failure(abort_code = 1)] // EInvalidPrice
+#[expected_failure(abort_code = profile_nft::EInvalidPrice)] // EInvalidPrice
 fun test_update_price_to_zero() {
     let mut scenario = init_test_scenario();
 
@@ -346,7 +352,7 @@ fun test_update_treasury() {
 }
 
 #[test]
-#[expected_failure(abort_code = 1)] // EInvalidPrice
+#[expected_failure(abort_code = profile_nft::EInvalidPrice)] // EInvalidPrice
 fun test_update_treasury_unauthorized() {
     let mut scenario = init_test_scenario();
 
@@ -390,7 +396,7 @@ fun test_full_workflow() {
             b"My Awesome Profile",
             b"AI-generated profile picture",
             b"https://walrus.test/myprofile",
-            ts::ctx(&mut scenario)
+            ts::ctx(&mut scenario),
         );
     };
 
