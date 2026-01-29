@@ -150,7 +150,7 @@ export function ImageGenerator() {
     setError(null);
 
     try {
-      const mintTx = buildMintNFTTransaction(nftName, nftDescription, walrusUrl);
+      const mintTx = buildMintNFTTransaction(account.address, nftName, nftDescription, walrusUrl);
 
       signAndExecute(
         { transaction: mintTx },
@@ -351,13 +351,12 @@ export function ImageGenerator() {
             <button
               onClick={handleRegisterBlob}
               disabled={!walrusUpload.canRegister || walrusUpload.isRegistering || !account}
-              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-between ${
-                walrusUpload.canRelay || walrusUpload.canCertify
+              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-between ${walrusUpload.canRelay || walrusUpload.canCertify
                   ? 'border-cyber bg-cyber/10 text-cyber cursor-default'
                   : walrusUpload.canRegister && !!account
-                  ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
-                  : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
-              }`}
+                    ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
+                    : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
+                }`}
             >
               <span className="flex items-center gap-3">
                 {getStepIcon(walrusUpload.canRegister, walrusUpload.canRelay || walrusUpload.canCertify, walrusUpload.isRegistering)}
@@ -370,13 +369,12 @@ export function ImageGenerator() {
             <button
               onClick={handleUploadToNetwork}
               disabled={!walrusUpload.canRelay || walrusUpload.isRelaying}
-              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${
-                walrusUpload.canCertify
+              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${walrusUpload.canCertify
                   ? 'border-cyber bg-cyber/10 text-cyber cursor-default'
                   : walrusUpload.canRelay
-                  ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
-                  : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
-              }`}
+                    ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
+                    : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
+                }`}
             >
               {getStepIcon(walrusUpload.canRelay, walrusUpload.canCertify, walrusUpload.isRelaying)}
               <span>02. Upload to Network</span>
@@ -386,13 +384,12 @@ export function ImageGenerator() {
             <button
               onClick={handleCertifyUpload}
               disabled={!walrusUpload.canCertify || walrusUpload.isCertifying}
-              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${
-                !!walrusUrl
+              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${!!walrusUrl
                   ? 'border-cyber bg-cyber/10 text-cyber cursor-default'
                   : walrusUpload.canCertify
-                  ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
-                  : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
-              }`}
+                    ? 'border-cyber bg-void text-cyber hover:bg-cyber hover:text-void'
+                    : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
+                }`}
             >
               {getStepIcon(walrusUpload.canCertify, !!walrusUrl, walrusUpload.isCertifying)}
               <span>03. Certify Upload</span>
@@ -402,11 +399,10 @@ export function ImageGenerator() {
             <button
               onClick={handleMintNFT}
               disabled={!walrusUrl || isMinting || !nftName.trim()}
-              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${
-                !!walrusUrl && !!nftName.trim()
+              className={`w-full px-6 py-5 border-[3px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-3 ${!!walrusUrl && !!nftName.trim()
                   ? 'border-magenta bg-void text-magenta hover:bg-magenta hover:text-void'
                   : 'border-smoke/30 bg-void text-smoke/30 cursor-not-allowed'
-              }`}
+                }`}
             >
               {getStepIcon(!!walrusUrl && !!nftName.trim(), false, isMinting)}
               <span>04. Mint NFT</span>

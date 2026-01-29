@@ -99,7 +99,7 @@ public fun mint_nft(
     description: vector<u8>,
     image_url: vector<u8>,
     ctx: &mut TxContext,
-) {
+): ProfileNFT {
     let nft = ProfileNFT {
         id: object::new(ctx),
         name: string::utf8(name),
@@ -119,13 +119,7 @@ public fun mint_nft(
         timestamp: nft.created_at,
     });
 
-    // Transfer NFT to the creator
-    transfer::public_transfer(nft, ctx.sender());
-}
-
-/// Transfer an NFT to a recipient
-public fun transfer_nft(nft: ProfileNFT, recipient: address, _ctx: &mut TxContext) {
-    transfer::public_transfer(nft, recipient);
+    nft
 }
 
 /// Update payment configuration (only callable by current treasury)

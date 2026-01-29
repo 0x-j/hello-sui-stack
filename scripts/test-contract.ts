@@ -97,7 +97,7 @@ async function testContract() {
     const testName = 'Test Profile NFT #1';
     const testDescription = 'This is a test profile NFT generated during contract testing';
 
-    mintTx.moveCall({
+    const [mintedNft] = mintTx.moveCall({
       target: `${PACKAGE_ID}::profile_nft::mint_nft`,
       arguments: [
         mintTx.pure.string(testName),
@@ -105,6 +105,9 @@ async function testContract() {
         mintTx.pure.string(testImageUrl),
       ],
     });
+
+    mintTx.transferObjects([mintedNft], keypair.toSuiAddress());
+
 
     const mintResult = await client.signAndExecuteTransaction({
       signer: keypair,

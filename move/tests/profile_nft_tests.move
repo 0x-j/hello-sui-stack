@@ -158,12 +158,13 @@ fun test_mint_nft_creates_nft() {
         let description = b"A test profile picture";
         let image_url = b"https://walrus.test/blob123";
 
-        profile_nft::mint_nft(
+        let nft = profile_nft::mint_nft(
             name,
             description,
             image_url,
             ts::ctx(&mut scenario),
         );
+        transfer::public_transfer(nft, USER1);
     };
 
     // Verify NFT was created and transferred to user
@@ -198,23 +199,25 @@ fun test_mint_multiple_nfts() {
     // Mint first NFT
     ts::next_tx(&mut scenario, USER1);
     {
-        profile_nft::mint_nft(
+        let nft1 = profile_nft::mint_nft(
             b"NFT #1",
             b"First NFT",
             b"https://walrus.test/blob1",
             ts::ctx(&mut scenario),
         );
+        transfer::public_transfer(nft1, USER1);
     };
 
     // Mint second NFT
     ts::next_tx(&mut scenario, USER1);
     {
-        profile_nft::mint_nft(
+        let nft2 = profile_nft::mint_nft(
             b"NFT #2",
             b"Second NFT",
             b"https://walrus.test/blob2",
             ts::ctx(&mut scenario),
         );
+        transfer::public_transfer(nft2, USER1);
     };
 
     // Verify both NFTs exist
@@ -242,19 +245,20 @@ fun test_transfer_nft() {
     // Mint NFT for USER1
     ts::next_tx(&mut scenario, USER1);
     {
-        profile_nft::mint_nft(
+        let nft = profile_nft::mint_nft(
             b"Transfer Test NFT",
             b"Testing NFT transfer",
             b"https://walrus.test/transfer",
             ts::ctx(&mut scenario),
         );
+        transfer::public_transfer(nft, USER1);
     };
 
     // Transfer NFT to USER2
     ts::next_tx(&mut scenario, USER1);
     {
         let nft = ts::take_from_sender<ProfileNFT>(&scenario);
-        profile_nft::transfer_nft(nft, USER2, ts::ctx(&mut scenario));
+        transfer::public_transfer(nft, USER2);
     };
 
     // Verify USER2 received the NFT
@@ -392,12 +396,13 @@ fun test_full_workflow() {
     // Step 2: User mints NFT after receiving generated image
     ts::next_tx(&mut scenario, USER1);
     {
-        profile_nft::mint_nft(
+        let nft = profile_nft::mint_nft(
             b"My Awesome Profile",
             b"AI-generated profile picture",
             b"https://walrus.test/myprofile",
             ts::ctx(&mut scenario),
         );
+        transfer::public_transfer(nft, USER1);
     };
 
     // Step 3: Verify NFT was created

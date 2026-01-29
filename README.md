@@ -2,6 +2,8 @@
 
 A full-stack dapp built for the Sui hackathon that allows users to generate AI-powered profile images and mint them as NFTs on the Sui blockchain.
 
+Contract deployed on testnet at https://suiscan.xyz/testnet/object/0x2c385d9c13cab0bed873bb13a3c7ca336d54bb6c08eb8d5f2377314dbcdc3fad/contracts.
+
 ## Features
 
 - 🎨 **AI Image Generation**: Create unique profile pictures using nano banana AI model

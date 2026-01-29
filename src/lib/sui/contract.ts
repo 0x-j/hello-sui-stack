@@ -28,13 +28,14 @@ export function buildPaymentTransaction(): Transaction {
  * Build a transaction to mint a ProfileNFT
  */
 export function buildMintNFTTransaction(
+  sender: string,
   name: string,
   description: string,
   imageUrl: string
 ): Transaction {
   const tx = new Transaction();
 
-  tx.moveCall({
+  const [mintedNft] = tx.moveCall({
     target: `${CONTRACT_CONFIG.packageId}::profile_nft::mint_nft`,
     arguments: [
       tx.pure.string(name),
@@ -42,6 +43,8 @@ export function buildMintNFTTransaction(
       tx.pure.string(imageUrl),
     ],
   });
+
+  tx.transferObjects([mintedNft], sender);
 
   return tx;
 }
